@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://cruh8bbcfvyvr"]
+[gd_scene load_steps=6 format=3 uid="uid://cruh8bbcfvyvr"]
 
 [ext_resource type="Texture2D" uid="uid://brp4euwugc18f" path="res://assets/background.png" id="1_blg2x"]
 [ext_resource type="PackedScene" uid="uid://bt33j5dwxano3" path="res://scenes/top_ui.tscn" id="2_wrbvl"]
+[ext_resource type="FontFile" uid="uid://b25431rxog83j" path="res://assets/fonts/Kenney Blocks.ttf" id="3_45cji"]
 [ext_resource type="PackedScene" uid="uid://bvo0n67nd7pe3" path="res://scenes/bottom_ui.tscn" id="3_sxn8e"]
 [ext_resource type="Script" path="res://scripts/grid.gd" id="4_4jr62"]
 
@@ -13,6 +14,14 @@ offset_bottom = 1024.0
 texture = ExtResource("1_blg2x")
 
 [node name="top_ui" parent="." instance=ExtResource("2_wrbvl")]
+
+[node name="Button" type="Button" parent="."]
+offset_left = 231.0
+offset_top = 902.0
+offset_right = 342.0
+offset_bottom = 934.0
+theme_override_fonts/font = ExtResource("3_45cji")
+text = " restart"
 
 [node name="bottom_ui" parent="." instance=ExtResource("3_sxn8e")]
 
@@ -37,6 +46,7 @@ one_shot = true
 wait_time = 0.5
 one_shot = true
 
+[connection signal="pressed" from="Button" to="grid" method="_on_button_pressed"]
 [connection signal="game_over_signal" from="grid" to="bottom_ui" method="_on_grid_game_over_signal"]
 [connection signal="goal_updated" from="grid" to="top_ui" method="_on_grid_goal_updated"]
 [connection signal="score_updated" from="grid" to="top_ui" method="_on_score_updated"]

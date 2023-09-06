@@ -13,7 +13,7 @@ var state
 @export var y_offset: int
 
 # Game modes
-@export var time_mode: bool = false
+@export var time_mode: bool = true
 
 
 # Game variables
@@ -42,14 +42,15 @@ var is_controlling = false
 
 
 # Scoring and moves
-var current_score = 0
+var current_score
 var current_streak = 1
-var current_bonus = 30
+var current_bonus = 10
 var is_valid_swap = false
-var remaining_time = 5
-var max_moves = 100
+var remaining_time
+var max_moves
 var current_moves = 0
 var chain_mode = false
+var destroyed_pieces_count = 0
 
 # Signals
 signal score_updated(new_score)
@@ -63,16 +64,23 @@ signal win_game_signal()
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	init_game()
+
+func init_game():
+	current_score = 0
+	remaining_time = 60
+	max_moves = 100
 	state = MOVE
 	randomize()
 	all_pieces = make_2d_array()
 	spawn_pieces()
 	emit_signal("goal_updated",goal_score)
+	emit_signal("score_updated", current_score)
 	if time_mode:
 		emit_signal("time_updated", remaining_time)
 		
 	else:
-		emit_signal("steps_updated", max_moves - current_moves) 
+		emit_signal("steps_updated", max_moves) 
 
 
 func make_2d_array():
@@ -159,14 +167,14 @@ func swap_pieces(column, row, direction: Vector2):
 		find_matches()
 	else: 
 		current_streak = 1
-		current_bonus = 30
+		current_bonus = 10
 		is_valid_swap = false
  
 func correct_move():
 	if not time_mode and not chain_mode:
 		current_moves += 1
 		emit_signal("steps_updated", max_moves - current_moves)
-	current_bonus = 30 * current_streak  # Incrementa el bono para el próximo movimiento válido
+	current_bonus = 10* destroyed_pieces_count * current_streak  # Incrementa el bono para el próximo movimiento válido
 	print(current_bonus)	
 	current_score += current_bonus  # Suma el bono actual al puntaje
 	#current_streak += 1  # Incrementa la racha
@@ -258,12 +266,15 @@ func find_matches():
 	
 func destroy_matched():
 	var was_matched = false
+	destroyed_pieces_count = 0
 	for i in width:
 		for j in height:
 			if all_pieces[i][j] != null and all_pieces[i][j].matched:
 				was_matched = true
+				destroyed_pieces_count += 1
 				all_pieces[i][j].queue_free()
 				all_pieces[i][j] = null
+	#print("Fichas eliminadas en este turno: ", destroyed_pieces_count)
 	move_checked = true
 	is_valid_swap = was_matched
 	if was_matched:
@@ -353,3 +364,13 @@ func win_game():
 		state = WAIT  
 		emit_signal('win_game_signal')
 
+
+
+func _on_button_pressed():
+	for i in width:
+		for j in height:
+			if all_pieces[i][j] != null:
+				all_pieces[i][j].queue_free()
+				all_pieces[i][j] = null
+				
+	init_game()
